@@ -9,7 +9,7 @@ function update(source) {
   const files = {
     imports: source.replace(".component.h", ".imports.h"),
     source: source.replace(".component.h", ".c"),
-    exports: source.replace(".component.h", ".exports.h"),
+    exports: source.replace(".component.h", ".exports.h"),    
   };
 
   fs.readFile(source, (err, data) => {
@@ -72,28 +72,57 @@ function parseImports(content, lines) {
 }
 
 function writeExportsHeaderAndSource(content, files, methods) {
+
+  const start = files.source.lastIndexOf('/') + 1;
+  const componentHeader = files.source.replace(".c", ".component.h").slice(start);
+  
   let lines = {
     includes: ["#pragma once", "#include <base/base.h>"],
     struct: [],
-    source: [],
-  };
+    source: [`#include "${componentHeader}"`],
+  }; 
 
 
   if(parseExports(files, lines, methods)){
+    lines.source.push("");
     const variable = lines.struct[lines.struct.length - 1].replace('extern', '').replace(";", " = {").trim();
-    console.log(variable);    
+    lines.source.push(variable);
+    const exported = getExported(methods);
+    exported
+      .forEach(method => {
+        const name = method.match(/\w+\s?\(/g)[0].replace("(", "");        
+        lines.source.push(`\t.${name} = ${name},`);
+      }) 
+    lines.source.push("};")  
   }
+  lines.source.push("");
 
-  lines = [...lines.includes, "", ...lines.struct, ""];
-  const text = lines.join("\n");
+  const linesExports = [...lines.includes, "", ...lines.struct, ""];
+  const textExports = linesExports.join("\n");
 
-  fs.writeFileSync(files.exports, text);
+  const textSource = lines.source.join("\n");  
+
+  fs.writeFileSync(files.exports, textExports);
+  fs.writeFileSync(files.source, textSource);
 }
 //create dest file
 
+function getExported(methods){
+  return methods
+    .filter((method) => method.includes("export"))
+    .map((method) =>
+      method
+      .replace(/(static|export|inline)/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+  )
+}
+
 function parseExports(files, lines, methods) {
-  const exportedMethods = methods.filter((method) => method.includes("export"));
-  if (exportedMethods.length === 0) {
+  
+  const exported = getExported(methods);
+  
+  if (exported.length === 0) {
     return false;
   }
 
@@ -104,13 +133,7 @@ function parseExports(files, lines, methods) {
     .replaceAll("/", "_")}`;
   lines.struct.push("struct " + namespace + " {");
 
-  exportedMethods
-    .map((method) =>
-      method
-        .replace(/(static|export|inline)/g, "")
-        .replace(/\s+/g, " ")
-        .trim()
-    )
+    exported
     .forEach((method) => {
       const name = method.match(/\w+\s?\(/g)[0].replace("(", "");
       method = method.replace(name, `(*${name})`);

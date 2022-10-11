@@ -3,9 +3,9 @@
 
 struct nova_ns_let {
 	void* (*allocate)(size_t size);
-	let (*build)(void* value, Type* type);
+	let (*build)(void* value, struct type* type);
 	void (*delete)(let self);
-	void* (*getp)(let self, Type* type);
+	void* (*get)(let self, struct type* type);
 };
 
 extern const struct nova_ns_let nova_ns_let_instance;

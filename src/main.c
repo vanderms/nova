@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <let/let.component.h>
+#include <let/let.exports.h>
 
 
-int main(){
+int main(){  
   return 0;
 }

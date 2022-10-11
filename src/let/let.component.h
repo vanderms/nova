@@ -5,16 +5,16 @@
 export static void* allocate(size_t size){
   void* memory = malloc(sizeof(size));
   if(memory == null){
-    fprintf(stderr, "Fatal error. Failed to allocate memory.");
+    fprintf(stderr, "Fatal error in let module: failed to allocate memory.");
     exit(EXIT_FAILURE);    
-  }
-  return memory;
+  }  
+  return memory;  
 }
 
 
 static inline void assertNonNull(let self){
   if(self == null){  
-    fprintf(stderr, "Fatal error. Let module. Non null assertion.");
+    fprintf(stderr, "Fatal error in let module: non null assertion.");
     exit(EXIT_FAILURE);    
   }
 }
@@ -22,21 +22,21 @@ static inline void assertNonNull(let self){
 
 static inline void assertHash(let self){
   if(self->hash != HASH){
-    fprintf(stderr, "Fatal error. Let module. Hash assertion.");
+    fprintf(stderr, "Fatal error in let module: hash assertion.");
     exit(EXIT_FAILURE);
   }
 }
 
 
-void assertType(let self, Type* type){
+void assertType(let self, struct type* type){
   if(self->type != type){
-    fprintf(stderr, "Fatal error. Let module. Type assertion.");
+    fprintf(stderr, "Fatal error in let module: struct type assertion.");
     exit(EXIT_FAILURE);
   }  
 }
 
 
-export static let build(void* value, Type* type){  
+export static let build(void* value, struct type* type){  
   struct let model = {
     .hash = HASH,
     .type = type,    
@@ -58,7 +58,7 @@ export static void delete(let self){
 }
 
 
-export static void* getp(let self, Type* type){
+export static void* get(let self, struct type* type){
   assertNonNull(self);
   assertHash(self);
   assertType(self, type);

@@ -15,7 +15,7 @@ union value {
 
 struct let {
   int32_t hash;  
-  Type* const type;
+  struct type* const type;
   union value value;
 };
 
