@@ -2,16 +2,17 @@
 #include <let/let.model.h>
 
 
+/*Memory allocation*/
 export static void* allocate(size_t size){
   void* memory = malloc(sizeof(size));
   if(memory == null){
     fprintf(stderr, "Fatal error in let module: failed to allocate memory.");
     exit(EXIT_FAILURE);    
   }  
-  return memory;  
+  return memory;
 }
 
-
+/*Assertions*/
 static inline void assertNonNull(let self){
   if(self == null){  
     fprintf(stderr, "Fatal error in let module: non null assertion.");
@@ -20,15 +21,7 @@ static inline void assertNonNull(let self){
 }
 
 
-static inline void assertHash(let self){
-  if(self->hash != HASH){
-    fprintf(stderr, "Fatal error in let module: hash assertion.");
-    exit(EXIT_FAILURE);
-  }
-}
-
-
-void assertType(let self, struct type* type){
+static void assertType(let self, const struct type* type){
   if(self->type != type){
     fprintf(stderr, "Fatal error in let module: struct type assertion.");
     exit(EXIT_FAILURE);
@@ -36,9 +29,9 @@ void assertType(let self, struct type* type){
 }
 
 
-export static let build(void* value, struct type* type){  
-  struct let model = {
-    .hash = HASH,
+/*Main methods*/
+export static let build(void* value, const struct type* type){  
+  struct let model = {    
     .type = type,    
     .value = value
   };
@@ -47,20 +40,34 @@ export static let build(void* value, struct type* type){
 }
 
 
-export static void delete(let self){
-  if(self == null){
+export static void cleanup(let* ref){
+  if(ref == null || *ref == null){
     return;
-  }
-  assertHash(self);
-  self->type->destructor(self);
-  self->hash = 0;
+  } 
+  let self = *ref;
+  
+  if(self->type->destructor){
+    self->type->destructor(self);
+  }  
+  self->type = null;
   free(self);
+  ref = null;
 }
 
 
-export static void* get(let self, struct type* type){
-  assertNonNull(self);
-  assertHash(self);
+export static void* get(let self, const struct type* type){
+  assertNonNull(self); 
   assertType(self, type);
-  return self->value.object;
+  return self->value;
 } 
+
+
+export static const struct type* getType(let self){
+  assertNonNull(self);  
+  return self->type;
+}
+
+export static bool is(let self, const struct type* type){
+  assertNonNull(self); 
+  return self->type == type;
+}

@@ -4,7 +4,9 @@
 
 static void* allocate(size_t size);
 static inline void assertNonNull(let self);
-static inline void assertHash(let self);
-static let build(void* value, struct type* type);
-static void delete(let self);
-static void* get(let self, struct type* type);
+static void assertType(let self, const struct type* type);
+static let build(void* value, const struct type* type);
+static void cleanup(let* ref);
+static void* get(let self, const struct type* type);
+static const struct type* getType(let self);
+static bool is(let self, const struct type* type);

@@ -15,8 +15,7 @@
 typedef struct let* let;
 
 struct type {
-  void(*destructor)(let self);   
-  uint64_t (*hash)(let self);
+  void(*destructor)(let self); 
   int32_t (*compare)(let self, let other);
   const char* name;
 };
