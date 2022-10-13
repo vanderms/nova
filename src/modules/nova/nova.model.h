@@ -7,15 +7,13 @@
 #include <limits.h>
 #include <lib/index.h>
 
-#define export
-#define import(module, as)
 
 #define null NULL
+#define annotation(...)
 
 typedef struct let* let;
 
 struct type {
-  void(*destructor)(let self); 
-  int32_t (*compare)(let self, let other);
   const char* name;
+  void(*destructor)(let self);  
 };

@@ -1,9 +1,16 @@
-#include <let/let.imports.h>
-#include <let/let.model.h>
+#include "nova.imports.h"
+annotation(import | modules.nova.collections.list | ls)
 
+typedef struct let* let;
+
+struct let {
+  const struct type* type;
+  void* value;
+};
 
 /*Memory allocation*/
-export static void* allocate(size_t size){
+annotation(export)
+static void* allocate(size_t size){
   void* memory = malloc(sizeof(size));
   if(memory == null){
     fprintf(stderr, "Fatal error in let module: failed to allocate memory.");
@@ -12,7 +19,7 @@ export static void* allocate(size_t size){
   return memory;
 }
 
-/*Assertions*/
+
 static inline void assertNonNull(let self){
   if(self == null){  
     fprintf(stderr, "Fatal error in let module: non null assertion.");
@@ -29,8 +36,8 @@ static void assertType(let self, const struct type* type){
 }
 
 
-/*Main methods*/
-export static let build(void* value, const struct type* type){  
+annotation(export)
+static let build(void* value, const struct type* type){  
   struct let model = {    
     .type = type,    
     .value = value
@@ -39,8 +46,8 @@ export static let build(void* value, const struct type* type){
   return self;
 }
 
-
-export static void cleanup(let* ref){
+annotation(export)
+static void cleanup(let* ref){
   if(ref == null || *ref == null){
     return;
   } 
@@ -54,20 +61,22 @@ export static void cleanup(let* ref){
   ref = null;
 }
 
-
-export static void* get(let self, const struct type* type){
+annotation(export)
+static void* get(let self, const struct type* type){
   assertNonNull(self); 
   assertType(self, type);
-  return self->value;
+  return self->value;  
 } 
 
 
-export static const struct type* getType(let self){
+annotation(export)
+static const struct type* type(let self){
   assertNonNull(self);  
   return self->type;
 }
 
-export static bool is(let self, const struct type* type){
+annotation(export)
+static bool is(let self, const struct type* type){
   assertNonNull(self); 
   return self->type == type;
 }
