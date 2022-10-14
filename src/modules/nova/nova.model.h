@@ -18,4 +18,4 @@ struct type {
   void(*destructor)(let self);  
 };
 
-const uint32_t NV_LET_HASH = 0x4ad7f3b;
+static const uint32_t NV_LET_HASH = 0x4ad7f3b;

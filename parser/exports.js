@@ -1,5 +1,7 @@
 import { StaticHandler } from "./static.js";
 import { ConstructorHandler } from "./constructor.js";
+import { MethodHandler } from "./method.js";
+import { DestructorHandler } from "./destructor.js";
 
 export class ExportsHandler {
   static updateModule(files, data, namespace) {
@@ -15,6 +17,8 @@ export class ExportsHandler {
     this.setMethods();
     StaticHandler.updateModule(ExportsHandler);
     ConstructorHandler.updateModule(ExportsHandler);
+    MethodHandler.updateModule(ExportsHandler);
+    DestructorHandler.updateModules(ExportsHandler);
   }
 
   static setMethods() {
@@ -64,9 +68,9 @@ export class ExportsHandler {
       case "constructor":
         return ConstructorHandler.handleConstructor(annotation);
       case "destructor":
-        return this.handleDestructor();
+        return DestructorHandler.handleDestructor(annotation);
       case "method":
-        return this.handleMethod();
+        return MethodHandler.handleMethod(annotation);
     }
   }
 
@@ -92,6 +96,7 @@ export class ExportsHandler {
       this.writeType();
     }
   }
+  
 
   static writeMethodsDeclaration() {
     this.files.imports.append("");

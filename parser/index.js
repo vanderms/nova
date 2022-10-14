@@ -15,29 +15,32 @@ class Parser {
   }
 
   onUpdate(path) {
-    this.setVariables(path);
+    try {
+      this.setVariables(path);
 
-    ExportsHandler.updateModule(this.files, this.data, this.namespace);
-    ImportsHandler.updateModule(this.files, this.data);
+      ExportsHandler.updateModule(this.files, this.data, this.namespace);
+      ImportsHandler.updateModule(this.files, this.data);
 
-    this.addHeaders();
+      this.addHeaders();
 
-    const annotations = this.findAnnotations();
+      const annotations = this.findAnnotations();
 
-    annotations.forEach((annotation) => {
-      if (
-        annotation.directive === "import" ||
-        annotation.directive === "type"
-      ) {
-        ImportsHandler.handleImport(annotation);
-      } else {
-        ExportsHandler.handleExports(annotation);
-      }
-    });
+      annotations.forEach((annotation) => {
+        if (annotation.directive === "import") {
+          ImportsHandler.handleImport(annotation);
+        } else if (annotation.directive === "type") {
+          ImportsHandler.handleType(annotation);
+        } else {
+          ExportsHandler.handleExports(annotation);
+        }
+      });
 
-    ImportsHandler.writeImports();
-    ExportsHandler.writeExports();
-    this.addSpaceAndWriteFiles();
+      ImportsHandler.writeImports();
+      ExportsHandler.writeExports();
+      this.addSpaceAndWriteFiles();
+    } catch (err) {
+      console.log(err.message);
+    }
   }
 
   setVariables(path) {
@@ -77,7 +80,7 @@ class Parser {
         const [directive, ...params] = result[0]
           .match(/\(.*\)/)[0]
           .replace(/[\(\)]/g, "")
-          .split("|");
+          .split(",");
         annotations.push({
           text: result[0],
           index: result.index,

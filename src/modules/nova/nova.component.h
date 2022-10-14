@@ -38,7 +38,8 @@ static let build(void* value, const struct type* type){
     .type = type,    
     .value = value
   };
-  let self = memcpy(allocate(sizeof(struct let)), &model, sizeof(struct let));
+  void* memory = checkAllocation(malloc(sizeof model));
+  let self = memcpy(memory, &model, sizeof model);
   return self;
 }
 

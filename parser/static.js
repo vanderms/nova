@@ -1,4 +1,3 @@
-import { methodPattern } from "./regex.js";
 
 export class StaticHandler {
   static updateModule(manager) {

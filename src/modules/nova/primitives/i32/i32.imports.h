@@ -3,14 +3,16 @@
 #include <modules/nova/nova.exports.h>
 
 #define nv nvnova_
-typedef struct primitive* primitive;
+typedef struct T* T;
 
-static primitive create(int32_t value);
-static int32_t get(primitive self);
-static void set(primitive self, int32_t value);
+static T create(int32_t value);
+static void destroy(T self);
+static int32_t get(T self);
+static void set(T self, int32_t value);
+static void nvdestroy(let self);
 
 static const struct type NVTYPE = {
   .hash = NV_LET_HASH,
   .name = "nova.primitives.i32",
-  .destructor = null
+  .destructor = nvdestroy
 };
