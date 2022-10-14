@@ -1,9 +1,10 @@
 #pragma once
 #include "nova.exports.h"
 
-static void* allocate(size_t size);
+
+static void* checkAllocation(void* memory);
 static inline void assertNonNull(let self);
-static void assertType(let self, const struct type* type);
+static inline void assertType(let self, const struct type* type);
 static let build(void* value, const struct type* type);
 static void cleanup(let* ref);
 static void* get(let self, const struct type* type);

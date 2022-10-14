@@ -1,5 +1,4 @@
 #include "nova.imports.h"
-annotation(import | modules.nova.collections.list | ls)
 
 typedef struct let* let;
 
@@ -8,10 +7,9 @@ struct let {
   void* value;
 };
 
-/*Memory allocation*/
-annotation(export)
-static void* allocate(size_t size){
-  void* memory = malloc(sizeof(size));
+
+annotation(static)
+static void* checkAllocation(void* memory){  
   if(memory == null){
     fprintf(stderr, "Fatal error in let module: failed to allocate memory.");
     exit(EXIT_FAILURE);    
@@ -23,20 +21,18 @@ static void* allocate(size_t size){
 static inline void assertNonNull(let self){
   if(self == null){  
     fprintf(stderr, "Fatal error in let module: non null assertion.");
-    exit(EXIT_FAILURE);    
+    exit(EXIT_FAILURE);
   }
 }
 
-
-static void assertType(let self, const struct type* type){
+static inline void assertType(let self, const struct type* type){ 
   if(self->type != type){
-    fprintf(stderr, "Fatal error in let module: struct type assertion.");
+    fprintf(stderr, "Fatal error in let module: type assertion.");
     exit(EXIT_FAILURE);
   }  
 }
 
-
-annotation(export)
+annotation(static)
 static let build(void* value, const struct type* type){  
   struct let model = {    
     .type = type,    
@@ -46,36 +42,45 @@ static let build(void* value, const struct type* type){
   return self;
 }
 
-annotation(export)
+annotation(static)
 static void cleanup(let* ref){
   if(ref == null || *ref == null){
     return;
-  } 
-  let self = *ref;
-  
-  if(self->type->destructor){
-    self->type->destructor(self);
-  }  
+  }
+
+  let self = *ref;  
+  if(self->type->hash != NV_LET_HASH){
+    fprintf(stderr, "Fatal error in let.cleanup method: incorrect hash value.");
+    exit(EXIT_FAILURE);    
+  }
+
+  if(self->type->destructor == null){
+    free(self->value);
+  }
+  else { 
+    self->type->destructor(self);   
+  }
+
   self->type = null;
   free(self);
   ref = null;
 }
 
-annotation(export)
+annotation(static)
 static void* get(let self, const struct type* type){
   assertNonNull(self); 
   assertType(self, type);
   return self->value;  
-} 
+}
 
 
-annotation(export)
+annotation(static)
 static const struct type* type(let self){
   assertNonNull(self);  
   return self->type;
 }
 
-annotation(export)
+annotation(static)
 static bool is(let self, const struct type* type){
   assertNonNull(self); 
   return self->type == type;

@@ -1,8 +1,9 @@
 import chokidar from "chokidar";
 import fs from "fs";
 import { File } from "./file.js";
-import { MethodsHandler } from "./methods-handler.js";
-import { ExportsHandler } from "./exports-handler.js";
+import { Namespace } from "./namespace.js";
+import { ImportsHandler } from "./imports.js";
+import { ExportsHandler } from "./exports.js";
 
 class Parser {
   static run() {
@@ -10,43 +11,49 @@ class Parser {
     chokidar
       .watch("./src/**/*.component.h")
       .on("add", (path) => parser.onUpdate(path))
-      .on("change", () => parser.onUpdate(path));
+      .on("change", (path) => parser.onUpdate(path));
   }
 
   onUpdate(path) {
-    this.files = {
-      imports: new File(path, "imports.h"),
-      source: new File(path, "c"),
-      exports: new File(path, "exports.h"),
-    };
+    this.setVariables(path);
 
-    this.data = fs.readFileSync(path).toString();
-
-    this.name = path.slice(path.lastIndexOf("/") + 1, path.indexOf("."));
-
-    this.exportsHandler = new ExportsHandler(this.files, this.data);
+    ExportsHandler.updateModule(this.files, this.data, this.namespace);
+    ImportsHandler.updateModule(this.files, this.data);
 
     this.addHeaders();
 
     const annotations = this.findAnnotations();
 
     annotations.forEach((annotation) => {
-      if (annotation.directive === "export") {
-        this.exportsHandler.handleExport(annotation);
+      if (
+        annotation.directive === "import" ||
+        annotation.directive === "type"
+      ) {
+        ImportsHandler.handleImport(annotation);
+      } else {
+        ExportsHandler.handleExports(annotation);
       }
     });
 
-    MethodsHandler.getStaticMethodsDeclaration(this.data)?.forEach((method) =>
-      this.files.imports.append(`${method};`)
-    );
-
+    ImportsHandler.writeImports();
+    ExportsHandler.writeExports();
     this.addSpaceAndWriteFiles();
+  }
+
+  setVariables(path) {
+    this.files = {
+      imports: new File(path, "imports.h"),
+      source: new File(path, "c"),
+      exports: new File(path, "exports.h"),
+    };
+    this.data = fs.readFileSync(path).toString();
+    this.name = path.slice(path.lastIndexOf("/") + 1, path.indexOf("."));
+    this.namespace = Namespace.fromPath(path);
   }
 
   addHeaders() {
     this.files.imports.append("#pragma once");
     this.files.imports.append(`#include "${this.name}.exports.h"`);
-    this.files.imports.append("");
     this.files.exports.append("#pragma once");
     this.files.exports.append("#include <modules/nova/nova.model.h>");
     this.files.exports.append("");
@@ -74,8 +81,8 @@ class Parser {
         annotations.push({
           text: result[0],
           index: result.index,
-          directive,
-          params,
+          directive: directive.trim(),
+          params: params.map((p) => p.trim()),
         });
       }
     } while (pattern.lastIndex != 0);
