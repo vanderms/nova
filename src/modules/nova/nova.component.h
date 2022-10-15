@@ -1,4 +1,7 @@
 #include "nova.imports.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 typedef struct let* let;
 
@@ -17,6 +20,23 @@ static void* checkAllocation(void* memory){
   return memory;
 }
 
+annotation(static)
+static void println(const char* message){
+  printf("%s\n", message);
+}
+
+annotation(static)
+static void print(const char* message){
+  printf("%s", message);
+}
+
+annotation(static)
+static void assert(bool condition, const char* message){
+  if(!condition){
+    fprintf(stderr, "%s", message);
+    exit(EXIT_FAILURE);
+  }
+}
 
 static inline void assertNonNull(let self){
   if(self == null){  

@@ -4,6 +4,9 @@
 
 struct nvnova {
   void* (*checkAllocation)(void* memory);
+  void (*println)(const char* message);
+  void (*print)(const char* message);
+  void (*assert)(bool condition, const char* message);
   let (*build)(void* value, const struct type* type);
   void (*cleanup)(let* ref);
   void* (*get)(let self, const struct type* type);

@@ -1,14 +1,14 @@
-#include "i32.imports.h"
+#include "f64.imports.h"
 #include <stdlib.h>
 annotation(import, modules.nova, nv)
 
 annotation(type)
 struct T {
-  int32_t value;
+  double value;
 };
 
 annotation(constructor)
-static T create(int32_t value){
+static T create(double value){
   T self = nv.checkAllocation(malloc(sizeof(*self)));
   self->value = value;
   return self;
@@ -20,11 +20,11 @@ static void destroy(T self){
 }
 
 annotation(method)
-static int32_t get(T self){
+static double get(T self){
   return self->value;
 }
 
 annotation(method)
-static void set(T self, int32_t value){
+static void set(T self, double value){
   self->value = value;
 }
