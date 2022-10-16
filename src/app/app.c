@@ -1,2 +1,0 @@
-#include "app.component.h"
-
