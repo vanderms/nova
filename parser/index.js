@@ -1,17 +1,24 @@
 import chokidar from "chokidar";
 import fs from "fs";
+import { FileHandler } from "./files.js";
+import { MethodHandler } from "./methods.js";
+import { AnnotationHandler } from "./annotations.js";
 
 class Parser {
   static run() {
-    const parser = new Parser();
     chokidar
       .watch("./src/**/*.component.h")
-      .on("add", (path) => parser.onUpdate(path))
-      .on("change", (path) => parser.onUpdate(path));
+      .on("add", (path) => this.update(path))
+      .on("change", (path) => this.update(path));
   }
 
-  onUpdate(path) {
-   
+  static update(path) {
+    const data = fs.readFileSync(path);
+    MethodHandler.update(data);
+    FileHandler.update(path);
+    AnnotationHandler.update(data);
+    AnnotationHandler.processAnnotations();
+    FileHandler.write();
   }
 }
 

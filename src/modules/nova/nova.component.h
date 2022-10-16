@@ -1,4 +1,4 @@
-#include "nova.imports.h"
+#include "nova.private.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -20,7 +20,7 @@ static void* checkAllocation(void* memory){
   return memory;
 }
 
-annotation(static)
+annotation(static, hello, what)
 static void println(const char* message){
   printf("%s\n", message);
 }
